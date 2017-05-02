@@ -1,0 +1,6 @@
+﻿TODO List
+1. Add Restrictions in Word Detail
+2. Add Progress Bar to Show Progress of Searches
+3. Add Example Sentences
+4. Reword the setCombined type functions in the WordList class.
+5?. Redo how data shows up in word detail. Maybe adding and removing the corresponding labels dynamically by either creating new ones or enabling/disabling and setting visible existing labels.
