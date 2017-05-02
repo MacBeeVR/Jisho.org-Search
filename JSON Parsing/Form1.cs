@@ -22,29 +22,26 @@ namespace JSON_Parsing
             InitializeComponent();
         }
 
-        //--------------------------------Comment Needed-----------------------------------------------
+        //On Window Load
         private void searchWindow_Load(object sender, EventArgs e)
         {
+            //Setting the DisplayMembers to the corresponding properties.
             wordListBox.DisplayMember = "display";
             wordTypeComboBox.DisplayMember = "combinedPartsOfSpeech";
             otherFormsBox.DisplayMember = "word";
 
-            previousSearchTerm = "...***^%%$$#$%^!@#$^%%&(*&^#@#$%#@!!@#$!@#^*&*&^%$#$%^*&^%^&(*^#$%^#@#$%&^%$%^&@#$%&^%^$*&^%^&*%$#%^#$%^";
+            
+            previousSearchTerm = "";
             
             otherFormsBox.Enabled = false;
             wordTypeComboBox.Enabled = false;
         }
         
 
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-         * When the search box is clicked, the this function will parse the json and populate    *
-         * the listbox with words retrieved from the json from jisho.org's search API.           *
-         * When the search button is clicked, the program checks if there is a search term, if   *
-         * one exists, it will check to make sure it isn't the same search term as the previous. *
-         * I did this to limit json downloads to only new searches that contain a searchterm.    *
-         * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+        //Search Button Handler
         private void searchButton_Click(object sender, EventArgs e)
         {
+            //Checking for empty string or previously entered string before searching Jisho to prevent unnecessary downloads.
             if (!japaneseWord.Text.Equals("") & !japaneseWord.Text.Equals(previousSearchTerm))
             {
                 previousSearchTerm = japaneseWord.Text;
@@ -52,10 +49,12 @@ namespace JSON_Parsing
                 if(wordListBox.Items.Count > 0)
                     wordListBox.Items.Clear();
                 
+                //Downloading JSON String from Jisho and parsing into the words WordList class using JsonConvert from JSON.Net
                 words = new WordList.RootObject();
                 string json = new WebClient() { Encoding = Encoding.UTF8 }.DownloadString("http://jisho.org/api/v1/search/words?keyword=" + japaneseWord.Text);
                 words = JsonConvert.DeserializeObject<WordList.RootObject>(json);
                 
+                //Setting the word property as the reading property if no word property was found.
                 for(int i = 0; i < words.data.Count; i++)
                 {
                     if (words.data[i].japanese[0].word == null)
@@ -67,9 +66,10 @@ namespace JSON_Parsing
         }
 
 
-        //-------------------------Comment Needed-----------------------------------------
+        //Handler for Word List listbox
         private void wordListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            //Making sure an item has been selected first.
             if (wordListBox.SelectedIndex != -1)
             {
                 if (wordTypeComboBox.Items.Count > 0)
@@ -121,16 +121,24 @@ namespace JSON_Parsing
             }  
         }
 
-        //------------------------------Comment Needed-------------------------------------
+        //Handler for the Word Type combobox
         private void wordTypeBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if(wordTypeComboBox.SelectedIndex != -1)
             {
+                //Resetting the text to be empty so the previous text isn't still displayed when going through the next loop.
                 definition.Text = "";
-                for(int i = 0; i < words.data[wordListBox.SelectedIndex].senses[wordTypeComboBox.SelectedIndex].english_definitions.Count; i++)
+
+                //Number of definitons
+                int defCount = words.data[wordListBox.SelectedIndex].senses[wordTypeComboBox.SelectedIndex].english_definitions.Count;
+
+                //Loop for showing all of the definitions within the current word type.
+                for (int i = 0; i < defCount; i++)
                 {
-                    if (i != words.data[wordListBox.SelectedIndex].senses[wordTypeComboBox.SelectedIndex].english_definitions.Count - 1)
-                        definition.Text += (i + 1) + ". " + words.data[wordListBox.SelectedIndex].senses[wordTypeComboBox.SelectedIndex].english_definitions[i] + "\n";
+                    string currentDef = words.data[wordListBox.SelectedIndex].senses[wordTypeComboBox.SelectedIndex].english_definitions[i];
+
+                    if (i != defCount - 1)
+                        definition.Text += (i + 1) + ". " + currentDef +"\n";
                     else
                         definition.Text += (i + 1) + ". " + words.data[wordListBox.SelectedIndex].senses[wordTypeComboBox.SelectedIndex].english_definitions[i];
                 }
@@ -153,7 +161,7 @@ namespace JSON_Parsing
             }
         }
 
-        //-------------------------------Comment Needed------------------------------------
+        //Handler for box other forms box which holds other usages/spellings of the selected word.
         private void otherFormsBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (otherFormsBox.SelectedIndex != -1)
